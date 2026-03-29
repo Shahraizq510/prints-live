@@ -1,12 +1,13 @@
 // 1) Set this to your coffee link (BuyMeACoffee / Ko-fi / Stripe link)
 const COFFEE_URL = "https://ko-fi.com/YOUR_HANDLE";
 
-// 2) Optional: set your repo URL later (shows in footer)
+// 2) Optional: repo URL shown in footer
 const REPO_URL = "https://github.com/shahraizq510/prints-live";
+
+const STREAM_URL = 'https://prints.qureshi.io';
 
 const els = {
   year: document.getElementById('year'),
-  mjpeg: document.getElementById('mjpeg'),
   status: document.getElementById('status'),
   reload: document.getElementById('reload'),
   copyLink: document.getElementById('copyLink'),
@@ -38,78 +39,62 @@ if (COFFEE_URL && /^https?:\/\//i.test(COFFEE_URL)) {
 if (REPO_URL && /^https?:\/\//i.test(REPO_URL)) {
   els.ghLink.href = REPO_URL;
   els.ghLink.textContent = 'View source on GitHub';
-} else {
-  els.ghLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    alert('Optional: set REPO_URL in script.js after you create the repo.');
-  });
 }
 
-// Stream handling
-// Mobile browsers (esp. iOS Safari) often kill MJPEG <img> connections when backgrounded.
-// We auto-reload on resume, and we retry after errors.
-const STREAM_BASE_URL = 'https://prints.qureshi.io';
+// --- Stream reconnect logic ---
+// Key point: your MJPEG endpoint returns 400 when query params are present.
+// So we must reconnect WITHOUT adding ?t=... .
+// On mobile browsers, the reliable way is to replace the <img> node entirely.
 
 let loadedOnce = false;
-let retryTimer = null;
+let currentImg = document.getElementById('mjpeg');
 
-function scheduleRetry(ms = 1500) {
-  clearTimeout(retryTimer);
-  retryTimer = setTimeout(() => {
-    // Avoid hammering the stream while backgrounded
-    if (document.visibilityState === 'visible') reloadStream();
-  }, ms);
-}
-
-els.mjpeg.addEventListener('load', () => {
-  loadedOnce = true;
-  setStatus('good', 'Live');
-});
-
-els.mjpeg.addEventListener('error', () => {
-  setStatus('bad', 'Stream error');
-  scheduleRetry();
-});
-
-// Best-effort: after a few seconds, if we haven't loaded, mark as maybe-blocked.
-setTimeout(() => {
-  if (!loadedOnce) setStatus('bad', 'Not loading (blocked?)');
-}, 6000);
-
-function reloadStream(){
-  setStatus(null, 'Reloading…');
-
-  // Bust cache by appending a timestamp query param.
-  // Also hard-reset src first to force a new connection.
-  const url = STREAM_BASE_URL + '?t=' + Date.now();
-  els.mjpeg.src = '';
-  requestAnimationFrame(() => {
-    els.mjpeg.src = url + bust;
+function wireImg(img){
+  img.addEventListener('load', () => {
+    loadedOnce = true;
+    setStatus('good', 'Live');
+  });
+  img.addEventListener('error', () => {
+    setStatus('bad', 'Stream error');
   });
 }
 
-els.reload.addEventListener('click', reloadStream);
+wireImg(currentImg);
+
+function reconnectStream(){
+  setStatus(null, 'Reconnecting…');
+
+  const next = currentImg.cloneNode(false);
+  next.src = STREAM_URL; // no query params
+
+  currentImg.replaceWith(next);
+  currentImg = next;
+  wireImg(currentImg);
+
+  // If we still haven't loaded after a bit, show a clearer status.
+  setTimeout(() => {
+    if (!loadedOnce) setStatus('bad', 'Not loading (tap Reload)');
+  }, 6000);
+}
+
+els.reload.addEventListener('click', reconnectStream);
 
 els.copyLink.addEventListener('click', async () => {
-  const url = STREAM_BASE_URL;
   try {
-    await navigator.clipboard.writeText(url);
+    await navigator.clipboard.writeText(STREAM_URL);
     els.copyLink.textContent = 'Copied!';
     setTimeout(() => els.copyLink.textContent = 'Copy stream link', 1200);
   } catch {
-    prompt('Copy stream link:', url);
+    prompt('Copy stream link:', STREAM_URL);
   }
 });
 
-// Auto-recover when returning to the tab/app
+// When returning to the tab/app, try reconnecting (Android usually needs this; iOS often doesn’t).
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') reloadStream();
+  if (document.visibilityState === 'visible') reconnectStream();
 });
 
 // When restored from back-forward cache
 window.addEventListener('pageshow', (e) => {
-  if (e.persisted) reloadStream();
+  if (e.persisted) reconnectStream();
 });
-
-// Kick the stream once on initial load with a cache-busted URL
-reloadStream();
