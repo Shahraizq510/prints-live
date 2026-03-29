@@ -51,6 +51,10 @@ body{
   width:42px;height:42px;border-radius:14px;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   box-shadow: 0 10px 40px rgba(124,92,255,.25);
+  display:grid; place-items:center;
+  font-weight:900; letter-spacing:-.6px;
+  color:#081022;
+  user-select:none;
 }
 .title{font-weight:700; letter-spacing:.2px}
 .subtitle{color:var(--muted); font-size:13px; margin-top:2px}
