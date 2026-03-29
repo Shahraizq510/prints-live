@@ -198,14 +198,51 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
 .nowBody{
   padding: 0 16px 16px;
 }
-.nowValue{
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -0.2px;
+.nowGrid{
+  display:grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 12px;
+}
+.nowBlock{
   padding: 14px 14px;
   border-radius: 16px;
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(0,0,0,.18);
+}
+.nowKey{
+  color: rgba(234,240,255,.75);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  margin-bottom: 8px;
+}
+.nowVal{
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+}
+.nowUnit{
+  margin-left: 2px;
+  font-size: 16px;
+  opacity: .85;
+}
+.bar{
+  margin-top: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.10);
+  overflow:hidden;
+}
+.barFill{
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(124,92,255,.92), rgba(0,215,255,.75));
+  transition: width 500ms ease;
+}
+
+ (max-width: 720px){
+  .nowGrid{grid-template-columns: 1fr}
 }
 
 @media (max-width: 520px){
