@@ -8,7 +8,7 @@ const REPO_URL = "https://github.com/shahraizq510/prints-live";
 const STREAM_URL = 'https://prints.qureshi.io';
 
 // 4) Status endpoint (JSON)
-const STATUS_URL = 'https://printstatus.qureshi.io/status';
+const STATUS_URL = 'https://printstatus.interestingsoup.com/status';
 
 // Default value shown for everyone (owner updates this by telling me: "printing ...")
 const CURRENTLY_PRINTING_DEFAULT = 'Leaper - Arc Raiders';
