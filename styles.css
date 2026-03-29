@@ -60,7 +60,7 @@ body{
 .subtitle{color:var(--muted); font-size:13px; margin-top:2px}
 
 .nav{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
-.pill, .nav button.pill{
+.pill{
   display:inline-flex; align-items:center; justify-content:center;
   padding:10px 12px;
   border:1px solid var(--stroke);
@@ -69,8 +69,6 @@ body{
   text-decoration:none;
   background: rgba(255,255,255,.04);
   backdrop-filter: blur(10px);
-  cursor:pointer;
-  font: inherit;
 }
 .pill:hover{background: rgba(255,255,255,.07)}
 
@@ -95,7 +93,6 @@ body{
   text-decoration:none;
   box-shadow: 0 16px 60px rgba(124,92,255,.25);
   border: 1px solid rgba(255,255,255,.15);
-  cursor:pointer;
 }
 .cta:hover{filter:brightness(1.04)}
 .ctaDot{width:10px;height:10px;border-radius:99px;background:#081022; opacity:.75}
@@ -119,7 +116,6 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
 
 .note{margin-top:10px; color: rgba(234,240,255,.7); font-size:13px}
 .note code{color:rgba(234,240,255,.9)}
-
 
 .card{
   margin-top:14px;
@@ -186,21 +182,12 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
   gap:10px;
   align-items:center;
   justify-content:center;
-  flex-wrap:wrap;
   color: rgba(234,240,255,.65);
   font-size:13px;
-  padding: 18px 0 44px;
+  padding: 18px 0 30px;
 }
-
 .footer a{color: rgba(234,240,255,.75)}
 .sep{opacity:.5}
-
-@media (max-width: 520px){
-  .status{display:none}
-  .footer{flex-direction:column}
-  .sep{display:none}
-}
-
 
 /* Currently printing (card body) */
 .nowBody{
@@ -214,4 +201,8 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
   border-radius: 16px;
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(0,0,0,.18);
+}
+
+@media (max-width: 520px){
+  .status{display:none}
 }
