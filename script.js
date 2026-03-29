@@ -7,6 +7,9 @@ const REPO_URL = "https://github.com/shahraizq510/prints-live";
 // 3) Stream URL (MJPEG)
 const STREAM_URL = 'https://prints.qureshi.io';
 
+// Default value shown for everyone (owner updates this by telling me: "printing ...")
+const CURRENTLY_PRINTING_DEFAULT = 'Leaper - Arc Raiders';
+
 const els = {
   year: document.getElementById('year'),
   status: document.getElementById('status'),
@@ -88,23 +91,32 @@ window.addEventListener('pageshow', (e) => {
 });
 
 // --- Currently Printing (owner-controlled) ---
-// Set it by updating the site (tell me: "Printing X"), OR by visiting:
-// https://.../#printing=Leaper%20-%20Arc%20Raiders
-function readPrintingFromHash(){
+// Priority:
+// 1) URL hash parameter #printing=...
+// 2) localStorage value (per-device)
+// 3) global default (CURRENTLY_PRINTING_DEFAULT)
+function readPrinting(){
   const hash = (location.hash || '').slice(1);
   const params = new URLSearchParams(hash);
   const v = params.get('printing');
+
   if (v && v.trim()) {
     const text = decodeURIComponent(v).trim();
     els.currentlyPrinting.textContent = text;
     try { localStorage.setItem('currentlyPrinting', text); } catch {}
     return;
   }
+
   try {
     const saved = localStorage.getItem('currentlyPrinting');
-    if (saved) els.currentlyPrinting.textContent = saved;
+    if (saved) {
+      els.currentlyPrinting.textContent = saved;
+      return;
+    }
   } catch {}
+
+  els.currentlyPrinting.textContent = CURRENTLY_PRINTING_DEFAULT || '—';
 }
 
-window.addEventListener('hashchange', readPrintingFromHash);
-readPrintingFromHash();
+window.addEventListener('hashchange', readPrinting);
+readPrinting();
