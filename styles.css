@@ -186,15 +186,19 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
   gap:10px;
   align-items:center;
   justify-content:center;
+  flex-wrap:wrap;
   color: rgba(234,240,255,.65);
   font-size:13px;
-  padding: 18px 0 30px;
+  padding: 18px 0 44px;
 }
+
 .footer a{color: rgba(234,240,255,.75)}
 .sep{opacity:.5}
 
  (max-width: 520px){
   .status{display:none}
+  .footer{flex-direction:column}
+  .sep{display:none}
 }
 
 
