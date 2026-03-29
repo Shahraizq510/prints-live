@@ -45,14 +45,30 @@ if (REPO_URL && /^https?:\/\//i.test(REPO_URL)) {
   });
 }
 
-// Stream status
+// Stream handling
+// Mobile browsers (esp. iOS Safari) often kill MJPEG <img> connections when backgrounded.
+// We auto-reload on resume, and we retry after errors.
+const STREAM_BASE_URL = 'https://prints.qureshi.io';
+
 let loadedOnce = false;
+let retryTimer = null;
+
+function scheduleRetry(ms = 1500) {
+  clearTimeout(retryTimer);
+  retryTimer = setTimeout(() => {
+    // Avoid hammering the stream while backgrounded
+    if (document.visibilityState === 'visible') reloadStream();
+  }, ms);
+}
+
 els.mjpeg.addEventListener('load', () => {
   loadedOnce = true;
   setStatus('good', 'Live');
 });
+
 els.mjpeg.addEventListener('error', () => {
   setStatus('bad', 'Stream error');
+  scheduleRetry();
 });
 
 // Best-effort: after a few seconds, if we haven't loaded, mark as maybe-blocked.
@@ -62,15 +78,20 @@ setTimeout(() => {
 
 function reloadStream(){
   setStatus(null, 'Reloading…');
-  // Bust cache by appending a timestamp query param
-  const base = 'https://prints.qureshi.io';
-  els.mjpeg.src = base + (base.includes('?') ? '&' : '?') + 't=' + Date.now();
+
+  // Bust cache by appending a timestamp query param.
+  // Also hard-reset src first to force a new connection.
+  const url = STREAM_BASE_URL + '?t=' + Date.now();
+  els.mjpeg.src = '';
+  requestAnimationFrame(() => {
+    els.mjpeg.src = url;
+  });
 }
 
 els.reload.addEventListener('click', reloadStream);
 
 els.copyLink.addEventListener('click', async () => {
-  const url = 'https://prints.qureshi.io';
+  const url = STREAM_BASE_URL;
   try {
     await navigator.clipboard.writeText(url);
     els.copyLink.textContent = 'Copied!';
@@ -79,3 +100,16 @@ els.copyLink.addEventListener('click', async () => {
     prompt('Copy stream link:', url);
   }
 });
+
+// Auto-recover when returning to the tab/app
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') reloadStream();
+});
+
+// When restored from back-forward cache
+window.addEventListener('pageshow', (e) => {
+  if (e.persisted) reloadStream();
+});
+
+// Kick the stream once on initial load with a cache-busted URL
+reloadStream();
