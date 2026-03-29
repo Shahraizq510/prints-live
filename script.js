@@ -84,7 +84,7 @@ function reloadStream(){
   const url = STREAM_BASE_URL + '?t=' + Date.now();
   els.mjpeg.src = '';
   requestAnimationFrame(() => {
-    els.mjpeg.src = url;
+    els.mjpeg.src = url + bust;
   });
 }
 
