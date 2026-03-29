@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+
+  <title>Prints — Live</title>
+  <meta name="description" content="Live 3D printer stream + a quick way to support." />
+
+  <link rel="preconnect" href="https://prints.qureshi.io" crossorigin>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="bg" aria-hidden="true"></div>
+
+  <header class="wrap header">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <div class="title">Prints</div>
+        <div class="subtitle">Live 3D printer cam</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a class="pill" href="#stream">Stream</a>
+      <a class="pill" href="#support">Support</a>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <h1>Watch the printer.<br/>Catch the moment it sticks.</h1>
+      <p class="lead">A clean, modern view of the build plate — with an easy way to chip in for filament & upgrades.</p>
+      <div class="ctaRow" id="support">
+        <a class="cta" id="coffeeBtn" href="#" rel="noopener noreferrer" target="_blank">
+          <span class="ctaDot" aria-hidden="true"></span>
+          Buy me a coffee
+        </a>
+        <button class="ghost" id="copyLink">Copy stream link</button>
+      </div>
+      <div class="note" id="coffeeNote">Set your coffee link in <code>script.js</code>.</div>
+    </section>
+
+    <section class="card" id="stream">
+      <div class="cardHeader">
+        <div>
+          <div class="cardTitle">Live stream</div>
+          <div class="cardSub">If it freezes, refresh — MJPEG streams can hiccup.</div>
+        </div>
+        <div class="status" id="status"><span class="dot"></span><span>Loading…</span></div>
+      </div>
+
+      <div class="frame" aria-label="3D printer live stream">
+        <img
+          id="mjpeg"
+          src="https://prints.qureshi.io"
+          alt="3D printer stream"
+          loading="eager"
+          referrerpolicy="no-referrer"
+        />
+      </div>
+
+      <div class="row">
+        <button class="ghost" id="reload">Reload stream</button>
+        <a class="ghost" href="https://prints.qureshi.io" target="_blank" rel="noopener noreferrer">Open stream in new tab</a>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>© <span id="year"></span> Qureshi Prints</span>
+      <span class="sep">•</span>
+      <a href="#" id="ghLink" rel="noopener noreferrer" target="_blank">Built for GitHub Pages</a>
+    </footer>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+</html>
