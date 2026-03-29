@@ -195,7 +195,7 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
 .footer a{color: rgba(234,240,255,.75)}
 .sep{opacity:.5}
 
- (max-width: 520px){
+@media (max-width: 520px){
   .status{display:none}
   .footer{flex-direction:column}
   .sep{display:none}
