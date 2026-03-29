@@ -60,7 +60,7 @@ body{
 .subtitle{color:var(--muted); font-size:13px; margin-top:2px}
 
 .nav{display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end}
-.pill{
+.pill, .nav button.pill{
   display:inline-flex; align-items:center; justify-content:center;
   padding:10px 12px;
   border:1px solid var(--stroke);
@@ -69,6 +69,8 @@ body{
   text-decoration:none;
   background: rgba(255,255,255,.04);
   backdrop-filter: blur(10px);
+  cursor:pointer;
+  font: inherit;
 }
 .pill:hover{background: rgba(255,255,255,.07)}
 
@@ -93,6 +95,7 @@ body{
   text-decoration:none;
   box-shadow: 0 16px 60px rgba(124,92,255,.25);
   border: 1px solid rgba(255,255,255,.15);
+  cursor:pointer;
 }
 .cta:hover{filter:brightness(1.04)}
 .ctaDot{width:10px;height:10px;border-radius:99px;background:#081022; opacity:.75}
@@ -110,14 +113,30 @@ button.ghost, a.ghost{
   align-items:center;
   justify-content:center;
   gap:8px;
+  font: inherit;
 }
 button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
 
 .note{margin-top:10px; color: rgba(234,240,255,.7); font-size:13px}
 .note code{color:rgba(234,240,255,.9)}
 
+.now{
+  margin-top: 10px;
+  border-radius: 18px;
+  border:1px solid var(--stroke);
+  background: rgba(255,255,255,.04);
+  backdrop-filter: blur(10px);
+  padding: 14px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.nowLabel{color: rgba(234,240,255,.8); font-size:13px; text-transform:uppercase; letter-spacing:.12em}
+.nowValue{font-weight:700}
+
 .card{
-  margin-top:18px;
+  margin-top:14px;
   border-radius: var(--radius);
   border:1px solid var(--stroke);
   background: var(--card);
@@ -188,6 +207,69 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
 .footer a{color: rgba(234,240,255,.75)}
 .sep{opacity:.5}
 
+/* Modal */
+.modal{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding: 20px;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(10px);
+  z-index: 50;
+}
+.modal.open{display:flex}
+
+.modalCard{
+  width: min(720px, 100%);
+  border-radius: 18px;
+  border:1px solid var(--stroke);
+  background: rgba(15,23,48,.92);
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+
+.modalHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid var(--stroke);
+}
+
+.modalTitle{font-weight:800}
+.modalSub{margin-top:4px; color: var(--muted); font-size:13px}
+
+.iconBtn{
+  width:38px;height:38px;
+  border-radius: 12px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  cursor:pointer;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.form{padding: 14px}
+.field{display:block; margin-bottom: 12px}
+.field span{display:block; color: rgba(234,240,255,.8); font-size:13px; margin-bottom: 6px}
+.field input, .field textarea{
+  width:100%;
+  border-radius: 14px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,.18);
+  color: var(--text);
+  padding: 12px 12px;
+  font: inherit;
+}
+
+.formRow{display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; margin-top: 10px}
+.tiny{margin-top: 10px; color: rgba(234,240,255,.65); font-size:12px; line-height:1.4}
+
 @media (max-width: 520px){
   .status{display:none}
+  .now{flex-direction:column; align-items:flex-start}
 }
