@@ -1,5 +1,5 @@
 // 1) Set this to your coffee link (BuyMeACoffee / Ko-fi / Stripe link)
-const COFFEE_URL = "https://ko-fi.com/YOUR_HANDLE";
+const COFFEE_URL = "https://ko-fi.com/interestingsoup?ref=prints";
 
 // 2) Repo URL shown in footer
 const REPO_URL = "https://github.com/shahraizq510/prints-live";
