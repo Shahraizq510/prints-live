@@ -131,10 +131,11 @@ function formatEtaSeconds(totalSeconds){
 }
 
 function renderStatus(data){
-  const progress = Math.max(0, Math.min(100, Number(data?.progress)));
-  const eta = Number(data?.eta);
+  const progressRaw = Number(data?.progress);
+  const etaRaw = Number(data?.eta);
 
-  if (Number.isFinite(progress)) {
+  if (Number.isFinite(progressRaw)) {
+    const progress = Math.max(0, Math.min(100, progressRaw));
     els.progressPct.textContent = String(Math.round(progress));
     els.progressBar.style.width = `${progress}%`;
   } else {
@@ -142,7 +143,13 @@ function renderStatus(data){
     els.progressBar.style.width = '0%';
   }
 
-  els.etaText.textContent = formatEtaSeconds(eta);
+  els.etaText.textContent = formatEtaSeconds(etaRaw);
+}
+
+function renderStatusUnavailable(){
+  els.progressPct.textContent = '—';
+  els.progressBar.style.width = '0%';
+  els.etaText.textContent = '—';
 }
 
 async function fetchStatus(){
@@ -152,7 +159,8 @@ async function fetchStatus(){
     const json = await res.json();
     renderStatus(json);
   } catch {
-    // Leave previous values; don't spam errors
+    // Most likely reason from GitHub Pages is CORS not allowed by STATUS_URL.
+    renderStatusUnavailable();
   }
 }
 
