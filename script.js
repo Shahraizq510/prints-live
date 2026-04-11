@@ -11,7 +11,7 @@ const STREAM_URL = 'https://prints.qureshi.io';
 const STATUS_URL = 'https://printstatus.interestingsoup.com/status';
 
 // Default value shown for everyone (owner updates this by telling me: "printing ...")
-const CURRENTLY_PRINTING_DEFAULT = 'AI Camera Mount';
+const CURRENTLY_PRINTING_DEFAULT = 'Makeup Brush Container';
 
 const els = {
   year: document.getElementById('year'),
