@@ -144,6 +144,11 @@ function renderStatus(data){
   }
 
   els.etaText.textContent = formatEtaSeconds(etaRaw);
+
+  // Auto-update "Currently Printing" from printer data
+  if (data?.printName) {
+    els.currentlyPrinting.textContent = data.printName;
+  }
 }
 
 function renderStatusUnavailable(){
