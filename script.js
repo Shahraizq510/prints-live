@@ -10,8 +10,11 @@ const STREAM_URL = 'https://prints.qureshi.io';
 // 4) Status endpoint (JSON)
 const STATUS_URL = 'https://printstatus.interestingsoup.com/status';
 
-// Default value shown for everyone (owner updates this by telling me: "printing ...")
-const CURRENTLY_PRINTING_DEFAULT = 'Makeup Brush Container';
+// 5) Past prints endpoint
+const PAST_PRINTS_URL = 'https://printstatus.interestingsoup.com/past-prints';
+
+// Default value shown when API has no print name
+const CURRENTLY_PRINTING_DEFAULT = 'Idle';
 
 const els = {
   year: document.getElementById('year'),
@@ -25,6 +28,9 @@ const els = {
   progressPct: document.getElementById('progressPct'),
   progressBar: document.getElementById('progressBar'),
   etaText: document.getElementById('etaText'),
+
+  pastGrid: document.getElementById('pastGrid'),
+  pastEmpty: document.getElementById('pastEmpty'),
 };
 
 els.year.textContent = new Date().getFullYear();
@@ -72,7 +78,7 @@ function reconnectStream(){
   setStatus(null, 'Reconnecting…');
 
   const next = currentImg.cloneNode(false);
-  next.src = STREAM_URL; // no query params
+  next.src = STREAM_URL;
 
   currentImg.replaceWith(next);
   currentImg = next;
@@ -93,34 +99,7 @@ window.addEventListener('pageshow', (e) => {
   if (e.persisted) reconnectStream();
 });
 
-// --- Currently Printing (owner-controlled) ---
-function readPrinting(){
-  const hash = (location.hash || '').slice(1);
-  const params = new URLSearchParams(hash);
-  const v = params.get('printing');
-
-  if (v && v.trim()) {
-    const text = decodeURIComponent(v).trim();
-    els.currentlyPrinting.textContent = text;
-    try { localStorage.setItem('currentlyPrinting', text); } catch {}
-    return;
-  }
-
-  try {
-    const saved = localStorage.getItem('currentlyPrinting');
-    if (saved) {
-      els.currentlyPrinting.textContent = saved;
-      return;
-    }
-  } catch {}
-
-  els.currentlyPrinting.textContent = CURRENTLY_PRINTING_DEFAULT || '—';
-}
-
-window.addEventListener('hashchange', readPrinting);
-readPrinting();
-
-// --- Status (progress + ETA) ---
+// --- Status (progress + ETA + print name) ---
 function formatEtaSeconds(totalSeconds){
   if (typeof totalSeconds !== 'number' || !isFinite(totalSeconds) || totalSeconds < 0) return '—';
   const s = Math.floor(totalSeconds);
@@ -148,6 +127,8 @@ function renderStatus(data){
   // Auto-update "Currently Printing" from printer data
   if (data?.printName) {
     els.currentlyPrinting.textContent = data.printName;
+  } else {
+    els.currentlyPrinting.textContent = CURRENTLY_PRINTING_DEFAULT;
   }
 }
 
@@ -155,6 +136,7 @@ function renderStatusUnavailable(){
   els.progressPct.textContent = '—';
   els.progressBar.style.width = '0%';
   els.etaText.textContent = '—';
+  els.currentlyPrinting.textContent = '—';
 }
 
 async function fetchStatus(){
@@ -164,10 +146,47 @@ async function fetchStatus(){
     const json = await res.json();
     renderStatus(json);
   } catch {
-    // Most likely reason from GitHub Pages is CORS not allowed by STATUS_URL.
     renderStatusUnavailable();
   }
 }
 
 fetchStatus();
 setInterval(fetchStatus, 15000);
+
+// --- Past Prints (Timelapses) ---
+async function fetchPastPrints(){
+  try {
+    const res = await fetch(PAST_PRINTS_URL, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const prints = await res.json();
+
+    if (!prints.length) {
+      els.pastEmpty.textContent = 'No timelapses yet — they\'ll appear here after your next print!';
+      els.pastEmpty.style.display = '';
+      els.pastGrid.innerHTML = '';
+      return;
+    }
+
+    els.pastEmpty.style.display = 'none';
+    els.pastGrid.innerHTML = prints.map(p => `
+      <div class="pastCard">
+        <img class="pastGif" src="${escapeHtml(p.gifUrl)}" alt="${escapeHtml(p.name)}" loading="lazy" />
+        <div class="pastInfo">
+          <div class="pastName">${escapeHtml(p.name)}</div>
+          <div class="pastMeta">${escapeHtml(p.date)} · ${p.frames} frames</div>
+        </div>
+      </div>
+    `).join('');
+  } catch {
+    els.pastEmpty.textContent = 'Couldn\'t load past prints.';
+    els.pastEmpty.style.display = '';
+  }
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+fetchPastPrints();

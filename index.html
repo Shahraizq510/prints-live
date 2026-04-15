@@ -40,30 +40,30 @@
     </section>
 
     <section class="card" id="now">
-  <div class="cardHeader">
-    <div>
-      <div class="cardTitle">Print Status</div>
-      <div class="cardSub">Live progress + ETA, plus what I'm currently printing.</div>
-    </div>
-  </div>
-  <div class="nowBody">
-    <div class="nowGrid">
-  <div class="nowBlock">
-    <div class="nowKey">Printing</div>
-    <div class="nowVal" id="currentlyPrinting">—</div>
-  </div>
-  <div class="nowBlock">
-    <div class="nowKey">Progress</div>
-    <div class="nowVal"><span id="progressPct">—</span><span class="nowUnit">%</span></div>
-    <div class="bar" aria-hidden="true"><div class="barFill" id="progressBar" style="width:0%"></div></div>
-  </div>
-  <div class="nowBlock">
-    <div class="nowKey">ETA</div>
-    <div class="nowVal" id="etaText">—</div>
-  </div>
-</div>
-  </div>
-</section>
+      <div class="cardHeader">
+        <div>
+          <div class="cardTitle">Print Status</div>
+          <div class="cardSub">Live progress + ETA, plus what I'm currently printing.</div>
+        </div>
+      </div>
+      <div class="nowBody">
+        <div class="nowGrid">
+          <div class="nowBlock">
+            <div class="nowKey">Printing</div>
+            <div class="nowVal" id="currentlyPrinting">—</div>
+          </div>
+          <div class="nowBlock">
+            <div class="nowKey">Progress</div>
+            <div class="nowVal"><span id="progressPct">—</span><span class="nowUnit">%</span></div>
+            <div class="bar" aria-hidden="true"><div class="barFill" id="progressBar" style="width:0%"></div></div>
+          </div>
+          <div class="nowBlock">
+            <div class="nowKey">ETA</div>
+            <div class="nowVal" id="etaText">—</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section class="card" id="stream">
       <div class="cardHeader">
@@ -89,11 +89,25 @@
       </div>
     </section>
 
+    <section class="card" id="pastPrints">
+      <div class="cardHeader">
+        <div>
+          <div class="cardTitle">Past Prints</div>
+          <div class="cardSub">Timelapse replays of previous builds.</div>
+        </div>
+      </div>
+      <div class="pastBody" id="pastBody">
+        <div class="pastEmpty" id="pastEmpty">Loading timelapses…</div>
+        <div class="pastGrid" id="pastGrid"></div>
+      </div>
+    </section>
+
     <footer class="footer">
       <span>© <span id="year"></span> Soup Prints</span>
       <span class="sep">•</span>
       <a href="#" id="ghLink" rel="noopener noreferrer" target="_blank">Built for GitHub Pages</a>
     </footer>
-  </main><script src="./script.js"></script>
+  </main>
+  <script src="./script.js"></script>
 </body>
 </html>
