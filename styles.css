@@ -92,14 +92,14 @@ body{
   padding:12px 14px;
   border-radius: 14px;
   background: linear-gradient(135deg, rgba(124,92,255,.92), rgba(0,215,255,.62));
-  color:#081022;
+  color:#fff;
   font-weight:700;
   text-decoration:none;
   box-shadow: 0 16px 60px rgba(124,92,255,.25);
   border: 1px solid rgba(255,255,255,.15);
 }
 .cta:hover{filter:brightness(1.04)}
-.ctaDot{width:10px;height:10px;border-radius:99px;background:#081022; opacity:.75}
+.ctaIcon{width:20px;height:20px;flex-shrink:0}
 
 button.ghost, a.ghost{
   appearance:none;
