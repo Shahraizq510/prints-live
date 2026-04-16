@@ -92,11 +92,19 @@ function reconnectStream(){
 els.reload.addEventListener('click', reconnectStream);
 
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') reconnectStream();
+  if (document.visibilityState === 'visible') {
+    reconnectStream();
+    fetchStatus();          // re-fetch print status immediately
+    restartStatusInterval(); // ensure the 15s poll is alive
+  }
 });
 
 window.addEventListener('pageshow', (e) => {
-  if (e.persisted) reconnectStream();
+  if (e.persisted) {
+    reconnectStream();
+    fetchStatus();
+    restartStatusInterval();
+  }
 });
 
 // --- Status (progress + ETA + print name) ---
@@ -150,8 +158,14 @@ async function fetchStatus(){
   }
 }
 
+let statusInterval = null;
+function restartStatusInterval(){
+  if (statusInterval) clearInterval(statusInterval);
+  statusInterval = setInterval(fetchStatus, 15000);
+}
+
 fetchStatus();
-setInterval(fetchStatus, 15000);
+restartStatusInterval();
 
 // --- Past Prints (Timelapses) ---
 async function fetchPastPrints(){
