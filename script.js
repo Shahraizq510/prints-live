@@ -174,8 +174,8 @@ async function fetchPastPrints(){
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const prints = await res.json();
 
-    // Newest first
-    prints.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Newest first (reverse API order — server returns oldest first)
+    prints.reverse();
 
     if (!prints.length) {
       els.pastEmpty.textContent = 'No timelapses yet — they\'ll appear here after your next print!';
