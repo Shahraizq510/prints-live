@@ -187,13 +187,27 @@ async function fetchPastPrints(){
     els.pastEmpty.style.display = 'none';
     els.pastGrid.innerHTML = prints.map(p => `
       <div class="pastCard">
-        <img class="pastGif" src="${escapeHtml(p.gifUrl)}" alt="${escapeHtml(p.name)}" loading="lazy" />
+        <img class="pastGif" data-src="${escapeHtml(p.gifUrl)}" alt="${escapeHtml(p.name)}" />
         <div class="pastInfo">
           <div class="pastName">${escapeHtml(p.name)}</div>
           <div class="pastMeta">${escapeHtml(p.date)} · ${p.frames} frames</div>
         </div>
       </div>
     `).join('');
+
+    // Lazy-load GIFs as they scroll into view
+    const lazyObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.classList.add('loaded');
+          lazyObserver.unobserve(img);
+        }
+      });
+    }, { rootMargin: '200px' }); // start loading 200px before visible
+
+    els.pastGrid.querySelectorAll('img[data-src]').forEach(img => lazyObserver.observe(img));
   } catch {
     els.pastEmpty.textContent = 'Couldn\'t load past prints.';
     els.pastEmpty.style.display = '';

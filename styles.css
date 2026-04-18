@@ -272,6 +272,11 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
   object-fit: cover;
   display: block;
   background: rgba(0,0,0,.3);
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+.pastGif.loaded{
+  opacity: 1;
 }
 .pastInfo{
   padding: 12px 14px;
