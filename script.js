@@ -168,6 +168,73 @@ fetchStatus();
 restartStatusInterval();
 
 // --- Past Prints (Timelapses) ---
+
+// SVG icons for action buttons
+const ICONS = {
+  shop: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>`,
+  stl: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0022 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
+  desc: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
+};
+
+function buildActionBtn(icon, label, url) {
+  if (!url) return '';
+  return `<a class="pastAction" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" title="${escapeHtml(label)}">${icon}<span>${escapeHtml(label)}</span></a>`;
+}
+
+function handleCardClick(card) {
+  const isExpanded = card.classList.contains('expanded');
+
+  // Collapse any other expanded card
+  document.querySelectorAll('.pastCard.expanded').forEach(c => {
+    if (c !== card) {
+      c.classList.remove('expanded');
+      const img = c.querySelector('.pastGif');
+      if (img) { img.src = img.dataset.src; }
+    }
+  });
+
+  if (isExpanded) {
+    // Collapse: swap back to GIF
+    card.classList.remove('expanded');
+    const img = card.querySelector('.pastGif');
+    if (img) { img.src = img.dataset.src; }
+  } else {
+    // Expand: swap to final photo if available
+    card.classList.add('expanded');
+    const img = card.querySelector('.pastGif');
+    const photoUrl = card.dataset.photoUrl;
+    if (img && photoUrl) {
+      img.src = photoUrl;
+    }
+  }
+}
+
+// Description modal
+function showDescription(name, description) {
+  // Remove existing modal if any
+  document.querySelector('.descModal')?.remove();
+
+  const modal = document.createElement('div');
+  modal.className = 'descModal';
+  modal.innerHTML = `
+    <div class="descBackdrop"></div>
+    <div class="descContent">
+      <div class="descTitle">${escapeHtml(name)}</div>
+      <div class="descText">${escapeHtml(description)}</div>
+      <button class="ghost descClose" type="button">Close</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  requestAnimationFrame(() => modal.classList.add('open'));
+
+  const close = () => {
+    modal.classList.remove('open');
+    setTimeout(() => modal.remove(), 200);
+  };
+  modal.querySelector('.descBackdrop').addEventListener('click', close);
+  modal.querySelector('.descClose').addEventListener('click', close);
+}
+
 async function fetchPastPrints(){
   try {
     const res = await fetch(PAST_PRINTS_URL, { cache: 'no-store' });
@@ -185,15 +252,52 @@ async function fetchPastPrints(){
     }
 
     els.pastEmpty.style.display = 'none';
-    els.pastGrid.innerHTML = prints.map(p => `
-      <div class="pastCard">
-        <img class="pastGif" data-src="${escapeHtml(p.gifUrl)}" alt="${escapeHtml(p.name)}" />
+
+    const hasAnyActions = prints.some(p => p.shopUrl || p.stlUrl || p.description);
+
+    els.pastGrid.innerHTML = prints.map((p, i) => {
+      const actions = [];
+      if (p.shopUrl) actions.push(buildActionBtn(ICONS.shop, 'Shop', p.shopUrl));
+      if (p.stlUrl) actions.push(buildActionBtn(ICONS.stl, 'STL', p.stlUrl));
+      if (p.description) actions.push(
+        `<button class="pastAction pastDescBtn" data-idx="${i}" title="Description">${ICONS.desc}<span>Info</span></button>`
+      );
+
+      return `
+      <div class="pastCard${p.photoUrl ? ' hasPhoto' : ''}"
+           data-photo-url="${escapeHtml(p.photoUrl || '')}"
+           data-idx="${i}">
+        <div class="pastImgWrap">
+          <img class="pastGif" data-src="${escapeHtml(p.gifUrl)}" alt="${escapeHtml(p.name)}" />
+          ${p.photoUrl ? '<div class="pastTapHint">Tap for final photo</div>' : ''}
+        </div>
+        ${actions.length ? `<div class="pastActions">${actions.join('')}</div>` : ''}
         <div class="pastInfo">
           <div class="pastName">${escapeHtml(p.name)}</div>
           <div class="pastMeta">${escapeHtml(p.date)} · ${p.frames} frames</div>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
+
+    // Store prints data for description lookups
+    els.pastGrid._printsData = prints;
+
+    // Wire up card clicks (image toggle)
+    els.pastGrid.querySelectorAll('.pastCard').forEach(card => {
+      card.querySelector('.pastImgWrap')?.addEventListener('click', (e) => {
+        if (card.dataset.photoUrl) handleCardClick(card);
+      });
+    });
+
+    // Wire up description buttons (stop propagation so card doesn't toggle)
+    els.pastGrid.querySelectorAll('.pastDescBtn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = Number(btn.dataset.idx);
+        const p = els.pastGrid._printsData[idx];
+        if (p?.description) showDescription(p.name, p.description);
+      });
+    });
 
     // Lazy-load GIFs as they scroll into view
     const lazyObserver = new IntersectionObserver((entries) => {
@@ -205,7 +309,7 @@ async function fetchPastPrints(){
           lazyObserver.unobserve(img);
         }
       });
-    }, { rootMargin: '200px' }); // start loading 200px before visible
+    }, { rootMargin: '200px' });
 
     els.pastGrid.querySelectorAll('img[data-src]').forEach(img => lazyObserver.observe(img));
   } catch {
