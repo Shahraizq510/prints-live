@@ -253,23 +253,23 @@ async function fetchPastPrints(){
 
     els.pastEmpty.style.display = 'none';
 
-    const hasAnyActions = prints.some(p => p.shopUrl || p.stlUrl || p.description);
+    const hasAnyActions = prints.some(p => p.shopUrl || p.stlUrl || p.printDetails);
 
     els.pastGrid.innerHTML = prints.map((p, i) => {
       const actions = [];
       if (p.shopUrl) actions.push(buildActionBtn(ICONS.shop, 'Shop', p.shopUrl));
       if (p.stlUrl) actions.push(buildActionBtn(ICONS.stl, 'STL', p.stlUrl));
-      if (p.description) actions.push(
-        `<button class="pastAction pastDescBtn" data-idx="${i}" title="Description">${ICONS.desc}<span>Info</span></button>`
+      if (p.printDetails) actions.push(
+        `<button class="pastAction pastDescBtn" data-idx="${i}" title="Details">${ICONS.desc}<span>Info</span></button>`
       );
 
       return `
-      <div class="pastCard${p.photoUrl ? ' hasPhoto' : ''}"
-           data-photo-url="${escapeHtml(p.photoUrl || '')}"
+      <div class="pastCard${p.productPhotoUrl ? ' hasPhoto' : ''}"
+           data-photo-url="${escapeHtml(p.productPhotoUrl || '')}"
            data-idx="${i}">
         <div class="pastImgWrap">
           <img class="pastGif" data-src="${escapeHtml(p.gifUrl)}" alt="${escapeHtml(p.name)}" />
-          ${p.photoUrl ? '<div class="pastTapHint">Tap for final photo</div>' : ''}
+          ${p.productPhotoUrl ? '<div class="pastTapHint">Tap for final photo</div>' : ''}
         </div>
         ${actions.length ? `<div class="pastActions">${actions.join('')}</div>` : ''}
         <div class="pastInfo">
@@ -295,7 +295,7 @@ async function fetchPastPrints(){
         e.stopPropagation();
         const idx = Number(btn.dataset.idx);
         const p = els.pastGrid._printsData[idx];
-        if (p?.description) showDescription(p.name, p.description);
+        if (p?.printDetails) showDescription(p.name, p.printDetails);
       });
     });
 
