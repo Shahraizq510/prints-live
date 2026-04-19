@@ -447,6 +447,43 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
   width: 100%;
 }
 
+/* Reactions */
+.pastReactions{
+  display: flex;
+  gap: 6px;
+  padding: 6px 14px 12px;
+}
+.reactBtn{
+  appearance: none;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.04);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background .2s, border-color .2s, box-shadow .2s;
+  font-family: inherit;
+}
+.reactBtn:hover{
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.18);
+}
+.reactBtn.reacted{
+  background: rgba(124,92,255,.15);
+  border-color: rgba(124,92,255,.4);
+  box-shadow: 0 0 8px rgba(124,92,255,.2);
+  color: var(--text);
+}
+.reactCount{
+  font-size: 12px;
+  min-width: 8px;
+  text-align: center;
+}
+
 @media (max-width: 720px){
   .nowGrid{grid-template-columns: 1fr}
   .pastGrid{grid-template-columns: 1fr}

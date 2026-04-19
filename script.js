@@ -169,6 +169,51 @@ restartStatusInterval();
 
 // --- Past Prints (Timelapses) ---
 
+// Reaction config
+const REACTIONS = [
+  { key: 'thumbsup', emoji: '👍' },
+  { key: 'fire',     emoji: '🔥' },
+  { key: 'heart',    emoji: '❤️' },
+];
+
+const REACT_BASE = 'https://printstatus.interestingsoup.com';
+
+function buildReactionBtns(reactions) {
+  const r = reactions || {};
+  return REACTIONS.map(({ key, emoji }) =>
+    `<button class="reactBtn" data-reaction="${key}">${emoji}<span class="reactCount">${r[key] || 0}</span></button>`
+  ).join('');
+}
+
+async function handleReaction(btn, metaFile) {
+  const reaction = btn.dataset.reaction;
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${REACT_BASE}/past-prints/${encodeURIComponent(metaFile)}/react`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reaction }),
+    });
+    const data = await res.json();
+    if (res.ok && data.reactions) {
+      // Update all counts in this card's reaction row
+      const row = btn.closest('.pastReactions');
+      row.querySelectorAll('.reactBtn').forEach(b => {
+        const k = b.dataset.reaction;
+        if (data.reactions[k] !== undefined) {
+          b.querySelector('.reactCount').textContent = data.reactions[k];
+        }
+      });
+    }
+    // Mark active on success OR 429 (already reacted)
+    btn.classList.add('reacted');
+  } catch {
+    // silently fail
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 // SVG icons for action buttons
 const ICONS = {
   shop: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>`,
@@ -279,6 +324,9 @@ async function fetchPastPrints(){
           <div class="pastName">${escapeHtml(p.name)}</div>
           <div class="pastMeta">${escapeHtml(p.date)} · ${p.frames} frames</div>
         </div>
+        <div class="pastReactions" data-meta="${escapeHtml(p.metaFile || '')}">
+          ${buildReactionBtns(p.reactions)}
+        </div>
       </div>`;
     }).join('');
 
@@ -299,6 +347,15 @@ async function fetchPastPrints(){
         const idx = Number(btn.dataset.idx);
         const p = els.pastGrid._printsData[idx];
         if (p?.printDetails) showDescription(p.name, p.printDetails);
+      });
+    });
+
+    // Wire up reaction buttons
+    els.pastGrid.querySelectorAll('.reactBtn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const metaFile = btn.closest('.pastReactions').dataset.meta;
+        if (metaFile) handleReaction(btn, metaFile);
       });
     });
 
