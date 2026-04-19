@@ -296,6 +296,9 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
 .pastCard.hasPhoto{
   cursor: pointer;
 }
+.pastCard.interactive{
+  cursor: pointer;
+}
 .pastImgWrap{
   position: relative;
   overflow: hidden;

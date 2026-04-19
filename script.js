@@ -189,7 +189,7 @@ function handleCardClick(card) {
     if (c !== card) {
       c.classList.remove('expanded');
       const img = c.querySelector('.pastGif');
-      if (img) { img.src = img.dataset.src; }
+      if (img && img.dataset.src) { img.src = img.dataset.src; }
     }
   });
 
@@ -197,7 +197,7 @@ function handleCardClick(card) {
     // Collapse: swap back to GIF
     card.classList.remove('expanded');
     const img = card.querySelector('.pastGif');
-    if (img) { img.src = img.dataset.src; }
+    if (img && img.dataset.src) { img.src = img.dataset.src; }
   } else {
     // Expand: swap to final photo if available
     card.classList.add('expanded');
@@ -263,13 +263,15 @@ async function fetchPastPrints(){
         `<button class="pastAction pastDescBtn" data-idx="${i}" title="Details">${ICONS.desc}<span>Info</span></button>`
       );
 
+      const isInteractive = actions.length > 0 || p.productPhotoUrl;
+
       return `
-      <div class="pastCard${p.productPhotoUrl ? ' hasPhoto' : ''}"
+      <div class="pastCard${p.productPhotoUrl ? ' hasPhoto' : ''}${isInteractive ? ' interactive' : ''}"
            data-photo-url="${escapeHtml(p.productPhotoUrl || '')}"
            data-idx="${i}">
         <div class="pastImgWrap">
           <img class="pastGif" data-src="${escapeHtml(p.gifUrl)}" alt="${escapeHtml(p.name)}" />
-          ${p.productPhotoUrl ? '<div class="pastTapHint">Tap for final photo</div>' : ''}
+          ${isInteractive ? '<div class="pastTapHint">Tap to expand</div>' : ''}
         </div>
         ${actions.length ? `<div class="pastActions">${actions.join('')}</div>` : ''}
         <div class="pastInfo">
@@ -282,10 +284,10 @@ async function fetchPastPrints(){
     // Store prints data for description lookups
     els.pastGrid._printsData = prints;
 
-    // Wire up card clicks (image toggle)
-    els.pastGrid.querySelectorAll('.pastCard').forEach(card => {
+    // Wire up card clicks (expand/collapse)
+    els.pastGrid.querySelectorAll('.pastCard.interactive').forEach(card => {
       card.querySelector('.pastImgWrap')?.addEventListener('click', (e) => {
-        if (card.dataset.photoUrl) handleCardClick(card);
+        handleCardClick(card);
       });
     });
 
