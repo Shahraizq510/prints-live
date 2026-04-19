@@ -271,7 +271,8 @@ async function fetchPastPrints(){
            data-idx="${i}">
         <div class="pastImgWrap">
           <img class="pastGif" data-src="${escapeHtml(p.gifUrl)}" alt="${escapeHtml(p.name)}" />
-          ${isInteractive ? '<div class="pastTapHint">Tap to expand</div>' : ''}
+          ${isInteractive ? '<div class="pastTapHint pastTapExpand">Tap to expand</div>' : ''}
+          ${isInteractive ? '<div class="pastTapHint pastTapCollapse">Tap to collapse</div>' : ''}
         </div>
         ${actions.length ? `<div class="pastActions">${actions.join('')}</div>` : ''}
         <div class="pastInfo">

@@ -309,7 +309,6 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
   left: 0;
   right: 0;
   padding: 6px 10px;
-  background: linear-gradient(transparent, rgba(0,0,0,.7));
   color: rgba(255,255,255,.7);
   font-size: 11px;
   text-align: center;
@@ -317,11 +316,23 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
   transition: opacity .25s ease;
   pointer-events: none;
 }
-.pastCard.hasPhoto:hover .pastTapHint{
+.pastTapExpand{
+  background: linear-gradient(transparent, rgba(0,0,0,.7));
+}
+.pastTapCollapse{
+  background: rgba(0,0,0,.85);
+  display: none;
+}
+.pastCard.interactive:hover .pastTapExpand{
   opacity: 1;
 }
-.pastCard.expanded .pastTapHint{
+.pastCard.expanded .pastTapExpand{
   opacity: 0 !important;
+  display: none;
+}
+.pastCard.expanded .pastTapCollapse{
+  display: block;
+  opacity: 1;
 }
 .pastGif{
   transition: opacity .4s ease, transform .3s ease;
