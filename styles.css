@@ -324,7 +324,7 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
   color: rgba(0,0,0,.7);
   display: none;
 }
-.pastCard.interactive:hover .pastTapExpand{
+.pastCard.interactive .pastTapExpand{
   opacity: 1;
 }
 .pastCard.expanded .pastTapExpand{
@@ -334,6 +334,7 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
 .pastCard.expanded .pastTapCollapse{
   display: block;
   opacity: 1;
+  font-weight: 700;
 }
 .pastGif{
   transition: opacity .4s ease, transform .3s ease;
