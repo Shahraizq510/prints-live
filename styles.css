@@ -450,6 +450,7 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
 /* Reactions */
 .pastReactions{
   display: flex;
+  justify-content: center;
   gap: 6px;
   padding: 6px 14px 12px;
 }
