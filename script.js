@@ -178,25 +178,75 @@ const REACTIONS = [
 
 const REACT_BASE = 'https://printstatus.interestingsoup.com';
 
-function buildReactionBtns(reactions) {
+// Stores visitor's active reactions per metaFile: { "Print_2026.json": Set(["thumbsup"]) }
+let myReactions = {};
+
+async function loadMyReactions() {
+  try {
+    const res = await fetch(`${REACT_BASE}/reactions/me`, { cache: 'no-store', credentials: 'include' });
+    if (!res.ok) return;
+    const data = await res.json();
+    for (const [metaFile, arr] of Object.entries(data)) {
+      myReactions[metaFile] = new Set(arr);
+    }
+  } catch {}
+}
+
+function isReacted(metaFile, reaction) {
+  return myReactions[metaFile]?.has(reaction) || false;
+}
+
+function buildReactionBtns(reactions, metaFile) {
   const r = reactions || {};
-  return REACTIONS.map(({ key, emoji }) =>
-    `<button class="reactBtn" data-reaction="${key}">${emoji}<span class="reactCount">${r[key] || 0}</span></button>`
-  ).join('');
+  return REACTIONS.map(({ key, emoji }) => {
+    const active = isReacted(metaFile, key) ? ' reacted' : '';
+    return `<button class="reactBtn${active}" data-reaction="${key}">${emoji}<span class="reactCount">${r[key] || 0}</span></button>`;
+  }).join('');
+}
+
+function applyMyReactionsToDOM() {
+  document.querySelectorAll('.pastReactions').forEach(row => {
+    const metaFile = row.dataset.meta;
+    row.querySelectorAll('.reactBtn').forEach(btn => {
+      const key = btn.dataset.reaction;
+      if (isReacted(metaFile, key)) {
+        btn.classList.add('reacted');
+      } else {
+        btn.classList.remove('reacted');
+      }
+    });
+  });
 }
 
 async function handleReaction(btn, metaFile) {
   const reaction = btn.dataset.reaction;
+  const wasReacted = btn.classList.contains('reacted');
+
+  // Optimistic UI
+  btn.classList.toggle('reacted');
+  const countEl = btn.querySelector('.reactCount');
+  const oldCount = parseInt(countEl.textContent) || 0;
+  countEl.textContent = wasReacted ? Math.max(0, oldCount - 1) : oldCount + 1;
+
+  // Update local state optimistically
+  if (!myReactions[metaFile]) myReactions[metaFile] = new Set();
+  if (wasReacted) {
+    myReactions[metaFile].delete(reaction);
+  } else {
+    myReactions[metaFile].add(reaction);
+  }
+
   btn.disabled = true;
   try {
     const res = await fetch(`${REACT_BASE}/past-prints/${encodeURIComponent(metaFile)}/react`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ reaction }),
     });
     const data = await res.json();
-    if (res.ok && data.reactions) {
-      // Update all counts in this card's reaction row
+    if (data.reactions) {
+      // Sync all counts from server
       const row = btn.closest('.pastReactions');
       row.querySelectorAll('.reactBtn').forEach(b => {
         const k = b.dataset.reaction;
@@ -205,10 +255,24 @@ async function handleReaction(btn, metaFile) {
         }
       });
     }
-    // Mark active on success OR 429 (already reacted)
-    btn.classList.add('reacted');
+    if (data.myReactions) {
+      // Sync active state from server
+      myReactions[metaFile] = new Set(data.myReactions);
+      const row = btn.closest('.pastReactions');
+      row.querySelectorAll('.reactBtn').forEach(b => {
+        const k = b.dataset.reaction;
+        b.classList.toggle('reacted', myReactions[metaFile].has(k));
+      });
+    }
   } catch {
-    // silently fail
+    // Revert optimistic update on failure
+    btn.classList.toggle('reacted');
+    countEl.textContent = oldCount;
+    if (wasReacted) {
+      myReactions[metaFile]?.add(reaction);
+    } else {
+      myReactions[metaFile]?.delete(reaction);
+    }
   } finally {
     btn.disabled = false;
   }
@@ -282,7 +346,11 @@ function showDescription(name, description) {
 
 async function fetchPastPrints(){
   try {
-    const res = await fetch(PAST_PRINTS_URL, { cache: 'no-store' });
+    // Load visitor's reactions in parallel with prints
+    const [res] = await Promise.all([
+      fetch(PAST_PRINTS_URL, { cache: 'no-store' }),
+      loadMyReactions(),
+    ]);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const prints = await res.json();
 
@@ -325,7 +393,7 @@ async function fetchPastPrints(){
           <div class="pastMeta">${escapeHtml(p.date)} · ${p.frames} frames</div>
         </div>
         <div class="pastReactions" data-meta="${escapeHtml(p.metaFile || '')}">
-          ${buildReactionBtns(p.reactions)}
+          ${buildReactionBtns(p.reactions, p.metaFile)}
         </div>
       </div>`;
     }).join('');
