@@ -176,7 +176,7 @@ const REACTIONS = [
   { key: 'heart',    emoji: '❤️' },
 ];
 
-const REACT_BASE = 'https://printstatus.interestingsoup.com';
+const REACT_BASE = 'https://printer.interestingsoup.com';
 
 // Stores visitor's active reactions per metaFile: { "Print_2026.json": Set(["thumbsup"]) }
 let myReactions = {};
