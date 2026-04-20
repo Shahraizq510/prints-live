@@ -8,10 +8,10 @@ const REPO_URL = "https://github.com/shahraizq510/prints-live";
 const STREAM_URL = 'https://prints.qureshi.io';
 
 // 4) Status endpoint (JSON)
-const STATUS_URL = 'https://printstatus.interestingsoup.com/status';
+const STATUS_URL = 'https://printer.interestingsoup.com/status';
 
 // 5) Past prints endpoint
-const PAST_PRINTS_URL = 'https://printstatus.interestingsoup.com/past-prints';
+const PAST_PRINTS_URL = 'https://printer.interestingsoup.com/past-prints';
 
 // Default value shown when API has no print name
 const CURRENTLY_PRINTING_DEFAULT = 'Idle';
