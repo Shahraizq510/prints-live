@@ -74,8 +74,25 @@ function wireImg(img){
 
 wireImg(currentImg);
 
+// Fallback: poll naturalWidth to detect stream rendering (desktop MJPEG fix)
+let streamPollId = null;
+function startStreamPoll(){
+  stopStreamPoll();
+  streamPollId = setInterval(() => {
+    if (currentImg.naturalWidth > 0) {
+      loadedOnce = true;
+      setStatus('good', 'Live');
+      stopStreamPoll();
+    }
+  }, 500);
+}
+function stopStreamPoll(){ if(streamPollId){ clearInterval(streamPollId); streamPollId = null; } }
+
+startStreamPoll();
+
 function reconnectStream(){
   setStatus(null, 'Reconnecting…');
+  loadedOnce = false;
 
   const next = currentImg.cloneNode(false);
   next.src = STREAM_URL;
@@ -83,6 +100,7 @@ function reconnectStream(){
   currentImg.replaceWith(next);
   currentImg = next;
   wireImg(currentImg);
+  startStreamPoll();
 
   setTimeout(() => {
     if (!loadedOnce) setStatus('bad', 'Not loading (tap Reload)');
