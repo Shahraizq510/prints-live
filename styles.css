@@ -485,6 +485,210 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
   text-align: center;
 }
 
+/* "Request a print" header pill */
+.pill.requestOpen{
+  cursor:pointer;
+  font: inherit;
+  font-weight: 600;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 9px 14px;
+  background: linear-gradient(135deg, rgba(124,92,255,.22), rgba(0,215,255,.18));
+  border-color: rgba(124,92,255,.35);
+}
+.pill.requestOpen:hover{
+  background: linear-gradient(135deg, rgba(124,92,255,.32), rgba(0,215,255,.26));
+  border-color: rgba(124,92,255,.55);
+}
+.pillIcon{width:16px;height:16px;flex-shrink:0}
+
+/* Secondary CTA below past prints */
+.pastFooter{
+  display:flex;
+  flex-wrap:wrap;
+  gap:14px;
+  align-items:center;
+  justify-content:center;
+  margin-top: 18px;
+  padding: 18px 8px 4px;
+  border-top: 1px solid var(--stroke);
+  color: var(--muted);
+  font-size: 14px;
+}
+.cta-secondary{
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  box-shadow: none;
+  border-color: var(--stroke);
+}
+.cta-secondary:hover{
+  background: rgba(255,255,255,.10);
+}
+.cta-secondary svg{width:16px;height:16px}
+
+/* Request modal */
+.reqModal{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease;
+  padding: 20px;
+}
+.reqModal.open{ opacity: 1; pointer-events: auto; }
+.reqBackdrop{
+  position: absolute; inset: 0;
+  background: rgba(2,5,15,.7);
+  backdrop-filter: blur(8px);
+}
+.reqContent{
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  max-height: calc(100svh - 40px);
+  overflow-y: auto;
+  padding: 28px 26px 24px;
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  background: var(--card);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow);
+  transform: translateY(8px) scale(.98);
+  transition: transform .25s ease;
+}
+.reqModal.open .reqContent{ transform: translateY(0) scale(1); }
+.reqX{
+  position: absolute;
+  top: 10px; right: 12px;
+  width: 32px; height: 32px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 24px;
+  line-height: 1;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.reqX:hover{ background: rgba(255,255,255,.08); color: var(--text); }
+.reqHeader{ margin-bottom: 18px; }
+.reqTitle{
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -.2px;
+}
+.reqSub{
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.reqForm{ display: flex; flex-direction: column; gap: 14px; }
+.reqField label{
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 6px;
+}
+.reqHint{
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+  color: rgba(185,195,222,.6);
+  margin-left: 6px;
+}
+.reqField input,
+.reqField textarea{
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: 12px;
+  border: 1px solid var(--stroke);
+  background: rgba(0,0,0,.25);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color .15s, background .15s;
+}
+.reqField textarea{ resize: vertical; min-height: 90px; line-height: 1.5; }
+.reqField input:focus,
+.reqField textarea:focus{
+  border-color: rgba(124,92,255,.6);
+  background: rgba(0,0,0,.35);
+}
+.reqField input:invalid:not(:placeholder-shown){
+  border-color: rgba(255,93,93,.5);
+}
+.reqHoneypot{
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px; height: 1px;
+  overflow: hidden;
+}
+.reqError{
+  display: none;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: rgba(255,93,93,.12);
+  color: #ff8a8a;
+  font-size: 13px;
+}
+.reqError.show{ display: block; }
+.reqActions{
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+.reqActions .cta{ flex-shrink: 0; cursor: pointer; border: 1px solid rgba(255,255,255,.15); }
+.reqActions .ghost{ cursor: pointer; }
+
+.reqSpinner{
+  display: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #fff;
+  animation: reqSpin .7s linear infinite;
+  margin-left: 4px;
+}
+@keyframes reqSpin{ to{ transform: rotate(360deg); } }
+.reqForm.loading .reqSpinner{ display: inline-block; }
+.reqForm.loading .reqSubmitLabel{ opacity: .8; }
+.reqForm.loading button{ pointer-events: none; opacity: .85; }
+
+.reqSuccess{
+  text-align: center;
+  padding: 12px 0 4px;
+}
+.reqCheck{
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  margin: 4px auto 14px;
+  background: rgba(53,242,168,.14);
+  color: var(--good);
+  display: grid; place-items: center;
+}
+.reqCheck svg{ width: 28px; height: 28px; }
+.reqSuccessTitle{
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+.reqSuccessText{
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
 @media (max-width: 720px){
   .nowGrid{grid-template-columns: 1fr}
   .pastGrid{grid-template-columns: 1fr}
@@ -492,4 +696,7 @@ button.ghost:hover, a.ghost:hover{background: rgba(255,255,255,.07)}
 
 @media (max-width: 520px){
   .status{display:none}
+  .reqContent{ padding: 24px 20px 20px; }
+  .reqActions{ justify-content: stretch; }
+  .reqActions .cta, .reqActions .ghost{ flex: 1; justify-content: center; }
 }

@@ -13,6 +13,17 @@ const STATUS_URL = 'https://printer.interestingsoup.com/status';
 // 5) Past prints endpoint
 const PAST_PRINTS_URL = 'https://printer.interestingsoup.com/past-prints';
 
+// 6) FormTo "Request a print" submission endpoint.
+//    Get this from FormTo: https://forms.interestingsoup.com →
+//    your form → Setup → "Form endpoint" — it looks like
+//    https://forms.interestingsoup.com/f/<id>
+//    Until you replace REPLACE-ME the Request button still works,
+//    but submitting will show an inline "not yet configured" notice.
+const FORMTO_FORM_URL = 'https://forms.interestingsoup.com/f/print-requests-31c50d4w';
+
+// 7) Fallback contact shown if FORMTO_FORM_URL isn't configured yet.
+const REQUEST_FALLBACK_EMAIL = 'hello@interestingsoup.com';
+
 // Default value shown when API has no print name
 const CURRENTLY_PRINTING_DEFAULT = 'Idle';
 
@@ -471,3 +482,135 @@ function escapeHtml(str){
 }
 
 fetchPastPrints();
+
+// --- Request a Print (modal + FormTo submission) ---
+(function setupRequestModal(){
+  const modal = document.getElementById('requestModal');
+  const form = document.getElementById('requestForm');
+  const success = document.getElementById('requestSuccess');
+  const successText = document.getElementById('reqSuccessText');
+  const errorBox = document.getElementById('reqError');
+  const submitBtn = document.getElementById('reqSubmit');
+  if (!modal || !form) return;
+
+  const emailInput = form.querySelector('[name=email]');
+  const messageInput = form.querySelector('[name=message]');
+  const stlInput = form.querySelector('[name=stl_url]');
+  const honeypotInput = form.querySelector('[name=_gotcha]');
+
+  let lastTrigger = null;
+  let modalOpen = false;
+
+  function open(triggerEl){
+    lastTrigger = triggerEl || null;
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    modalOpen = true;
+    document.body.style.overflow = 'hidden';
+    // Focus first field after the transition
+    setTimeout(() => emailInput?.focus(), 50);
+  }
+
+  function close(){
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    modalOpen = false;
+    document.body.style.overflow = '';
+    // Don't reset the form on close — preserve fields for "Send another"
+    // unless we just submitted (handled by reqAnother button).
+    if (lastTrigger && typeof lastTrigger.focus === 'function') {
+      lastTrigger.focus();
+    }
+  }
+
+  function reset(keepEmail){
+    form.classList.remove('loading');
+    form.hidden = false;
+    success.hidden = true;
+    errorBox.classList.remove('show');
+    errorBox.textContent = '';
+    if (!keepEmail) emailInput.value = '';
+    messageInput.value = '';
+    stlInput.value = '';
+    if (honeypotInput) honeypotInput.value = '';
+  }
+
+  // Triggers
+  document.querySelectorAll('[data-request-open]').forEach((btn) => {
+    btn.addEventListener('click', (e) => { e.preventDefault(); open(btn); });
+  });
+
+  // Close affordances
+  document.querySelectorAll('[data-request-close]').forEach((btn) => {
+    btn.addEventListener('click', (e) => { e.preventDefault(); close(); });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modalOpen) close();
+  });
+
+  // "Send another" — clear everything and re-show the form
+  document.getElementById('reqAnother')?.addEventListener('click', () => {
+    reset(false);
+  });
+
+  // Submit
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox.classList.remove('show');
+    errorBox.textContent = '';
+
+    const email = emailInput.value.trim();
+    const message = messageInput.value.trim();
+    const stl = stlInput.value.trim();
+    const honeypot = (honeypotInput?.value || '').trim();
+
+    // Validation
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errorBox.textContent = 'Please enter a valid email so I can get back to you.';
+      errorBox.classList.add('show');
+      emailInput.focus();
+      return;
+    }
+    if (!message && !stl) {
+      errorBox.textContent = 'Tell me what to print, or paste a link to an STL — at least one is needed.';
+      errorBox.classList.add('show');
+      messageInput.focus();
+      return;
+    }
+    if (stl && !/^https?:\/\//i.test(stl)) {
+      errorBox.textContent = 'STL link must start with http:// or https://';
+      errorBox.classList.add('show');
+      stlInput.focus();
+      return;
+    }
+
+    // Not configured? Bail with a friendly fallback before hitting a 404.
+    if (!FORMTO_FORM_URL || /REPLACE-ME/i.test(FORMTO_FORM_URL)) {
+      errorBox.innerHTML = `Request system isn't connected yet. In the meantime, email <a href="mailto:${REQUEST_FALLBACK_EMAIL}" style="color:var(--accent2)">${REQUEST_FALLBACK_EMAIL}</a> directly.`;
+      errorBox.classList.add('show');
+      return;
+    }
+
+    form.classList.add('loading');
+    submitBtn.setAttribute('aria-busy', 'true');
+
+    try {
+      const res = await fetch(FORMTO_FORM_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email, message, stl_url: stl, _gotcha: honeypot }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      // FormTo returns { success: true } on 200
+      successText.textContent = `I got your request and will reply at ${email}.`;
+      form.hidden = true;
+      success.hidden = false;
+    } catch (err) {
+      errorBox.textContent = "Couldn't send right now. Please try again, or email " + REQUEST_FALLBACK_EMAIL + ".";
+      errorBox.classList.add('show');
+    } finally {
+      form.classList.remove('loading');
+      submitBtn.removeAttribute('aria-busy');
+    }
+  });
+})();
